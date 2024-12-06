@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bgs-tool"
-version = "0.1.19"
+version = "0.1.20"
 description = ""
 authors = ["Luc Shelton <lucshelton@gmail.com>"]
 readme = "README.md"
