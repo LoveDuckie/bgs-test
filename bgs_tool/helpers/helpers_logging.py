@@ -7,7 +7,7 @@ import os
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
-from bgs_tool import __title__
+from bgs_tool import __title__, BYTES_IN_MB
 
 _logger: logging.Logger | None = None
 
@@ -79,7 +79,7 @@ def _create_logger(
 
     # Rotate every 5 megabytes.
     file_handler: RotatingFileHandler = RotatingFileHandler(
-        filepath, maxBytes=5 * 1024 * 1024, backupCount=5
+        filepath, maxBytes=5 * BYTES_IN_MB, backupCount=5
     )
     file_handler.setLevel(verbosity)
     file_handler.setFormatter(formatter)

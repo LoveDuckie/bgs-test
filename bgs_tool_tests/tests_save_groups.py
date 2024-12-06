@@ -6,6 +6,7 @@ import os
 import unittest
 from unittest.mock import patch, MagicMock, mock_open
 
+from bgs_tool import BYTES_IN_MB
 from bgs_tool.__main__ import (
     save_groups,
 )
@@ -31,7 +32,7 @@ class TestSaveGroups(unittest.TestCase):
             [
                 {
                     "name": "file1",
-                    "size_bytes": 5 * 1024 * 1024,
+                    "size_bytes": 5 * BYTES_IN_MB,
                     "last_modified": "2024-12-03T12:00:00",
                 }
             ],
