@@ -1,0 +1,12 @@
+name: "Install Poetry"
+description: "Installs Poetry in the GitHub Actions runner"
+runs:
+  using: "composite"
+  steps:
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        echo "Poetry installed successfully."
+        poetry self add poetry-bumpversion
+      shell: bash
