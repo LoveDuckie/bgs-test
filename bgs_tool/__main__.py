@@ -91,7 +91,7 @@ def parse_arguments() -> Namespace:
                 ):
                     raise argparse.ArgumentTypeError(
                         f"'{param}' cannot be None when "
-                        f"\"--create-test-files\" is defined."
+                        f'"--create-test-files" is defined.'
                     )
 
             if all(
@@ -115,7 +115,7 @@ def parse_arguments() -> Namespace:
     parser = argparse.ArgumentParser(
         prog="bgs-tool",
         description="Group files in a directory based on size "
-                    "limits and save group details in JSON files.",
+        "limits and save group details in JSON files.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
@@ -342,11 +342,16 @@ def group_files(
     current_group_size_remaining = max_group_size_bytes
 
     for file in files:
-        current_file_size_bytes = file["size_bytes"]
+        current_file_name: str = file["name"]
+        current_file_size_bytes: int = file["size_bytes"]
+        logger.debug(
+            f"Processing file: '{current_file_name}' "
+            f"({current_file_size_bytes} bytes)"
+        )
 
         if current_file_size_bytes > max_group_size_bytes:
             logger.warning(
-                f"File '{file['name']}' exceeds the maximum group "
+                f"File '{current_file_name}' exceeds the maximum group "
                 f"size and will be skipped."
             )
             continue
@@ -397,14 +402,17 @@ def group_files_compact(
     groups: List[List[FileAttributes]] = []
     group_sizes: List[int] = []
     for file in files:
-        file_name = file["name"]
-        file_size_bytes = file["size_bytes"]
-        logger.debug(f"Processing file: {file_name} ({file_size_bytes} bytes)")
+        current_file_name: str = file["name"]
+        current_file_size_bytes: int = file["size_bytes"]
+        logger.debug(
+            f"Processing file: '{current_file_name}' "
+            f"({current_file_size_bytes} bytes)"
+        )
 
-        if file_size_bytes > max_group_size_bytes:
+        if current_file_size_bytes > max_group_size_bytes:
             logger.warning(
-                f"File '{file['name']}' exceeds the maximum "
-                f"group size and will be skipped."
+                f"File '{current_file_name}' exceeds the maximum group "
+                f"size and will be skipped."
             )
             continue
 
@@ -423,28 +431,34 @@ def group_files_compact(
         
         This secondary loop could likely be optimized for insert/retrieval.
         """
-        for current_group_index, current_group_size_bytes in enumerate(group_sizes):
+        for current_group_index, current_group_size_bytes in enumerate(
+            group_sizes
+        ):
             remaining_current_group_size_bytes = (
                 max_group_size_bytes - current_group_size_bytes
             )
             if (
-                file_size_bytes <= remaining_current_group_size_bytes
-                and remaining_current_group_size_bytes - file_size_bytes
+                current_file_size_bytes <= remaining_current_group_size_bytes
+                and remaining_current_group_size_bytes
+                - current_file_size_bytes
                 < tightest_fitting_group_size_bytes
             ):
                 tightest_fitting_group_index = current_group_index
                 tightest_fitting_group_size_bytes = (
-                    remaining_current_group_size_bytes - file_size_bytes
+                    remaining_current_group_size_bytes
+                    - current_file_size_bytes
                 )
 
         # If none fit best, or if there are not any (first iteration), then create a new group.
         if tightest_fitting_group_index != -1:
             groups[tightest_fitting_group_index].append(file)
-            group_sizes[tightest_fitting_group_index] += file_size_bytes
+            group_sizes[
+                tightest_fitting_group_index
+            ] += current_file_size_bytes
         else:
             # None found, or first iteration.
             groups.append([file])
-            group_sizes.append(file_size_bytes)
+            group_sizes.append(current_file_size_bytes)
 
     return groups
 
