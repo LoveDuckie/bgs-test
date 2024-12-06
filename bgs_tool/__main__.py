@@ -455,6 +455,11 @@ def group_files_compact(
             group_sizes[
                 tightest_fitting_group_index
             ] += current_file_size_bytes
+            if (
+                group_sizes[tightest_fitting_group_index]
+                == max_group_size_bytes
+            ):
+                group_sizes.pop(tightest_fitting_group_index)
         else:
             # None found, or first iteration.
             groups.append([file])
