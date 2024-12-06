@@ -166,7 +166,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: bgs-tool-build # Matches the artifact name from the build job
-          path: ./
+          path: ./bgs-tool-build
 
       - name: Set up Python
         uses: actions/setup-python@v4
