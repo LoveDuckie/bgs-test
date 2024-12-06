@@ -67,4 +67,3 @@ if is_command_available virtualenv; then
 fi
 
 bgs-tool $*
-sleep 5
