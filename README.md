@@ -66,12 +66,10 @@ bgs-tool --create-test-files --min-files 5 --max-files 15 --max-group-size-megab
 
 ### Example: Use Existing Source Files
 
-
 ```bash
 #!/bin/bash
-bgs-tool --create-test-files --max-group-size-megabytes 25 --method default --validate
+bgs-tool --source-dir <Path Goes Here> --max-group-size-megabytes 25 --method default --validate
 ```
-
 
 ## Installation
 
