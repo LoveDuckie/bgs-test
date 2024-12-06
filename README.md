@@ -28,7 +28,12 @@
 
 </div>
 
+### Example: All parameters
 
+```bash
+#!/usr/bin/env bash
+bgs-tool --create-test-files --min-file-size-bytes 1048576 --max-file-size-bytes 1048576 --max-group-size-megabytes 10 --method compact --min-files 20 --max-files 20
+```
 
 ### Example: Create and Use Test Data
 
