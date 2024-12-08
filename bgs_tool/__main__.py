@@ -9,6 +9,7 @@ import logging
 import os
 import shutil
 import sys
+from concurrent.futures import ProcessPoolExecutor, as_completed, BrokenExecutor
 from argparse import Namespace
 from datetime import datetime
 from typing import Iterator, List, Iterable, Callable
@@ -267,6 +268,24 @@ def list_files(
         sys.exit(-1)
 
 
+def _get_file_attribute(file_path: str) -> FileAttributes:
+    """
+
+    :param file_path: The absolute path tothe file.
+    :return:
+    """
+    if not file_path:
+        raise ValueError("The file entry specified is invalid or null.")
+    stat_result = os.stat(file_path)
+    return {
+        "name": os.path.basename(file_path),
+        "size_bytes": stat_result.st_size,
+        "last_modified": datetime.fromtimestamp(
+            stat_result.st_mtime
+        ).isoformat(),
+    }
+
+
 @benchmark
 def get_file_attributes(
     source_dir: str, logger: logging.Logger
@@ -295,25 +314,30 @@ def get_file_attributes(
     if not logger:
         raise ValueError("The logger instance is invalid or null.")
 
-    for entry in list_files(source_dir, logger):
-        try:
-            yield {
-                "name": entry.name,
-                "size_bytes": entry.stat().st_size,
-                "last_modified": datetime.fromtimestamp(
-                    entry.stat().st_mtime
-                ).isoformat(),
+    try:
+        with ProcessPoolExecutor(max_workers=4) as executor:
+            futures = {
+                executor.submit(_get_file_attribute, task.path): task
+                for task in list_files(source_dir, logger)
             }
-        except FileNotFoundError as e:
-            logger.exception(
-                f"Error retrieving information for file '{entry.name}': {e}",
-                exc_info=e,
-            )
-        except IOError as e:
-            logger.exception(
-                f"Error listing files in directory '{source_dir}': {e}",
-                exc_info=e,
-            )
+
+            for future in as_completed(futures):
+                task = futures[future]
+                try:
+                    result = future.result()
+                    yield result
+                except FileNotFoundError as exc:
+                    logger.exception(
+                        f"Error retrieving information for file '{exc.filename}': {exc}",
+                        exc_info=exc,
+                    )
+                except IOError as exc:
+                    logger.exception(
+                        f"Error listing files in directory '{source_dir}': {exc}",
+                        exc_info=exc,
+                    )
+    except BrokenExecutor as exc:
+        logger.exception(f"Broken executor: {exc}", exc_info=exc)
 
 
 @benchmark
