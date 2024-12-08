@@ -9,7 +9,11 @@ import logging
 import os
 import shutil
 import sys
-from concurrent.futures import ProcessPoolExecutor, as_completed, BrokenExecutor
+from concurrent.futures import (
+    ProcessPoolExecutor,
+    as_completed,
+    BrokenExecutor,
+)
 from argparse import Namespace
 from datetime import datetime
 from typing import Iterator, List, Iterable, Callable
