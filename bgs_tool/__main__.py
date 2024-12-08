@@ -319,6 +319,9 @@ def get_file_attributes(
         raise ValueError("The logger instance is invalid or null.")
 
     try:
+        # Remove the single-threaded overhead with the GIL by
+        # using ThreadPoolExecutor, and instead ensure
+        # that the bottleneck is bound by disk IO more than anything else.
         with ProcessPoolExecutor(max_workers=4) as executor:
             futures = {
                 executor.submit(_get_file_attribute, task.path): task
@@ -326,7 +329,6 @@ def get_file_attributes(
             }
 
             for future in as_completed(futures):
-                task = futures[future]
                 try:
                     result = future.result()
                     yield result
